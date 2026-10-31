@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#060607">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UniPlan — Organizador Acadêmico</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><span class="logo">U</span><b>UniPlan</b></div>
+  <nav id="nav" aria-label="Navegação principal">
+    <button type="button" data-view="dashboard" class="active"><i>▦</i><span>Dashboard</span></button>
+    <button type="button" data-view="tasks"><i>✔</i><span>Minhas tarefas</span></button>
+    <button type="button" data-view="agenda"><i>▤</i><span>Agenda</span></button>
+    <button type="button" data-view="subjects"><i>●</i><span>Disciplinas</span></button>
+    <button type="button" data-view="cards"><i>❏</i><span>Flashcards</span></button>
+    <button type="button" data-view="study"><i>↻</i><span>Revisar agora</span></button>
+  </nav>
+</aside>
+
+<main>
+  <header class="top">
+    <div><h1 id="greeting">Olá!</h1><p id="today" class="muted"></p><p id="saved" class="saved" aria-live="polite"></p></div>
+    <button type="button" class="btn" id="newTask">+ Nova atividade</button>
+  </header>
+  <div id="notice" class="notice" role="status" hidden></div>
+
+  <section id="view-dashboard" class="view">
+    <div class="stats">
+      <div class="card stat"><span class="muted">Tarefas</span><strong id="s-total">0</strong><small>atividades cadastradas</small></div>
+      <div class="card stat"><span class="muted">Pendentes</span><strong id="s-pending">0</strong><small>dentro do prazo</small></div>
+      <div class="card stat"><span class="muted">Concluídas</span><strong id="s-done">0</strong><small>entregues</small></div>
+      <div class="card stat late"><span class="muted">Atrasadas</span><strong id="s-late">0</strong><small>prazo vencido</small></div>
+      <div class="card stat"><span class="muted">Flashcards</span><strong id="s-cards">0</strong><small>cartões cadastrados</small></div>
+      <div class="card stat"><span class="muted">Não revisados</span><strong id="s-cnew">0</strong><small>ainda sem resposta</small></div>
+    </div>
+    <div class="card quick">
+      <b>Ações rápidas</b>
+      <button type="button" class="btn small" id="qa-task">+ Nova tarefa</button>
+      <button type="button" class="btn small" id="qa-card">+ Novo flashcard</button>
+      <button type="button" class="btn small ghost" id="qa-study">Revisar agora</button>
+    </div>
+    <div class="grid2">
+      <div class="stack">
+        <div class="card progress">
+          <div class="ring" id="ring"><span id="pct">0%</span></div>
+          <div><h2>Tarefas concluídas</h2><p id="progressText" class="muted"></p></div>
+        </div>
+        <div class="card progress">
+          <div class="ring" id="ring2"><span id="pct2">0%</span></div>
+          <div><h2>Flashcards aprendidos</h2><p id="progressText2" class="muted"></p></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Próximas entregas</h2>
+        <p id="upcomingInfo" class="muted"></p>
+        <div id="upcoming" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-tasks" class="view" hidden>
+    <div class="card toolbar">
+      <input type="search" id="q" placeholder="Buscar por título ou disciplina" aria-label="Buscar">
+      <select id="fl-status" aria-label="Status">
+        <option value="">Todos os status</option><option value="pending">Pendentes</option>
+        <option value="done">Concluídas</option><option value="late">Atrasadas</option>
+      </select>
+      <select id="fl-subject" aria-label="Disciplina"></select>
+      <select id="fl-priority" aria-label="Prioridade">
+        <option value="">Todas as prioridades</option><option value="alta">Alta</option>
+        <option value="média">Média</option><option value="baixa">Baixa</option>
+      </select>
+      <select id="fl-type" aria-label="Tipo">
+        <option value="">Todos os tipos</option><option value="prova">Prova</option>
+        <option value="trabalho">Trabalho</option><option value="exercício">Exercício</option><option value="outro">Outro</option>
+      </select>
+      <select id="order" aria-label="Ordenação">
+        <option value="asc">Entrega: mais próxima</option><option value="desc">Entrega: mais distante</option>
+      </select>
+      <button type="button" class="btn ghost" id="clear">Limpar filtros</button>
+    </div>
+    <p id="taskCount" class="muted"></p>
+    <div id="taskList" class="list"></div>
+  </section>
+
+  <section id="view-agenda" class="view" hidden>
+    <div class="seg">
+      <button type="button" id="agendaAll" data-mode="all" class="active">Todas</button>
+      <button type="button" id="agendaNext" data-mode="next">Próximas entregas</button>
+    </div>
+    <div id="agendaList"></div>
+  </section>
+
+  <section id="view-subjects" class="view" hidden>
+    <form id="subjectForm" class="card inline" novalidate>
+      <label for="sub-name">Nova disciplina</label>
+      <input id="sub-name" type="text" maxlength="60" placeholder="Ex.: Banco de Dados">
+      <input id="sub-color" type="color" value="#7c5cdb" aria-label="Cor da disciplina">
+      <button type="submit" class="btn">Adicionar</button>
+      <small id="sub-error" class="err"></small>
+    </form>
+    <div id="subjectList" class="list"></div>
+  </section>
+  <section id="view-cards" class="view" hidden>
+    <div class="stats">
+      <div class="card stat"><span class="muted">Total</span><strong id="fs-total">0</strong></div>
+      <div class="card stat"><span class="muted">Revisados</span><strong id="fs-reviewed">0</strong></div>
+      <div class="card stat"><span class="muted">Aprendidos</span><strong id="fs-learned">0</strong></div>
+      <div class="card stat"><span class="muted">Precisam de prática</span><strong id="fs-practice">0</strong></div>
+      <div class="card stat"><span class="muted">Progresso</span><strong id="fs-pct">0%</strong></div>
+    </div>
+    <div class="card toolbar tc">
+      <input type="search" id="cf-q" placeholder="Buscar na pergunta" aria-label="Buscar flashcards">
+      <select id="cf-subject" aria-label="Disciplina"></select>
+      <select id="cf-category" aria-label="Categoria"></select>
+      <select id="cf-status" aria-label="Estado">
+        <option value="">Todos os cartões</option><option value="new">Não revisados</option>
+        <option value="practice">Precisam de prática</option><option value="learned">Aprendidos</option>
+      </select>
+      <button type="button" class="btn ghost" id="cf-clear">Limpar</button>
+      <button type="button" class="btn" id="cf-new">+ Novo flashcard</button>
+    </div>
+    <p id="cardCount" class="muted"></p>
+    <div id="cardList" class="cards"></div>
+  </section>
+
+  <section id="view-study" class="view" hidden>
+    <div id="setup" class="card setup">
+      <div><label for="rs-subject">Disciplina</label><select id="rs-subject"></select></div>
+      <div><label for="rs-status">Cartões</label>
+        <select id="rs-status"><option value="">Todos</option><option value="new">Não revisados</option><option value="practice">Precisam de prática</option><option value="learned">Aprendidos</option></select></div>
+      <label class="check"><input type="checkbox" id="rs-shuffle"> Embaralhar</label>
+      <button type="button" class="btn" id="rs-start">Iniciar sessão</button>
+    </div>
+    <div id="studyBox"></div>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <form id="taskForm" novalidate>
+    <h2 id="dlgTitle">Nova atividade</h2>
+    <input type="hidden" id="t-id">
+    <label for="t-title">Título *</label>
+    <input id="t-title" type="text" maxlength="100"><small class="err" id="e-title"></small>
+    <label for="t-subject">Disciplina *</label>
+    <select id="t-subject"></select><small class="err" id="e-subject"></small>
+    <div class="row">
+      <div><label for="t-type">Tipo *</label>
+        <select id="t-type"><option value="prova">Prova</option><option value="trabalho" selected>Trabalho</option><option value="exercício">Exercício</option><option value="outro">Outro</option></select></div>
+      <div><label for="t-priority">Prioridade *</label>
+        <select id="t-priority"><option value="baixa">Baixa</option><option value="média" selected>Média</option><option value="alta">Alta</option></select></div>
+    </div>
+    <label for="t-date">Data de entrega *</label>
+    <input id="t-date" type="date"><small class="err" id="e-date"></small>
+    <label for="t-desc">Descrição (opcional)</label>
+    <textarea id="t-desc" rows="3" maxlength="400"></textarea>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="cancel">Cancelar</button>
+      <button type="submit" class="btn" id="saveBtn">Salvar atividade</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="cdlg">
+  <form id="cardForm" novalidate>
+    <h2 id="cdlgTitle">Novo flashcard</h2>
+    <input type="hidden" id="c-id">
+    <label for="c-front">Pergunta ou conceito *</label>
+    <textarea id="c-front" rows="2" maxlength="250"></textarea><small class="err" id="e-cfront"></small>
+    <label for="c-back">Resposta ou explicação *</label>
+    <textarea id="c-back" rows="3" maxlength="500"></textarea><small class="err" id="e-cback"></small>
+    <div class="row">
+      <div><label for="c-subject">Disciplina *</label><select id="c-subject"></select><small class="err" id="e-csub"></small></div>
+      <div><label for="c-category">Categoria (opcional)</label><input id="c-category" type="text" maxlength="40"></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="c-cancel">Cancelar</button>
+      <button type="submit" class="btn">Salvar flashcard</button>
+    </div>
+  </form>
+</dialog>
+<script src="script.js"></script>
+</body>
+</html>
